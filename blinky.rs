@@ -8,12 +8,13 @@
 
 #![no_std]
 #![no_main]
-extern crate panic_halt;
 extern crate embedded_hal;
+extern crate panic_halt;
 extern crate rp2040_hal;
 
 // Ensure we halt the program on panic (if we don't mention this crate it won't
 // be linked)
+#[allow(unused_imports)]
 use panic_halt as _;
 
 // Alias for our HAL crate
@@ -21,17 +22,17 @@ use rp2040_hal as hal;
 
 // A shorter alias for the Peripheral Access Crate, which provides low-level
 // register access
-use hal::pac;
+use crate::hal::pac;
 
 // Some traits we need
-use embedded_hal::digital::v2::OutputPin;
+use embedded_hal::digital::OutputPin;
 use rp2040_hal::clocks::Clock;
 
 /// The linker will place this boot block at the start of our program image. We
 /// need this to help the ROM bootloader get our code up and running.
 /// Note: This boot block is not necessary when using a rp-hal based BSP
 /// as the BSPs already perform this step.
-#[link_section = ".boot2"]
+#[unsafe(link_section = ".boot2")]
 #[used]
 pub static BOOT2: [u8; 256] = rp2040_boot2::BOOT_LOADER_GENERIC_03H;
 
@@ -82,7 +83,7 @@ fn main() -> ! {
     );
 
     // Configure GPIO25 as an output
-    let mut led_pin = pins.gpio25.into_push_pull_output();
+    let mut led_pin = pins.gpio16.into_push_pull_output();
     loop {
         led_pin.set_high().unwrap();
         delay.delay_ms(500);
